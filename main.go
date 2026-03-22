@@ -41,7 +41,7 @@ func main() {
 
 	commands := commands{
 		cmds: map[string]func(*state, command) error{},
-	} 
+	}
 	commands.register("login", handlerLogin)
 
 	args := os.Args[1:]

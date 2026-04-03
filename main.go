@@ -55,10 +55,12 @@ func main() {
 	}
 	commands.register("login", handlerLogin)
 	commands.register("register", handlerRegister)
+	commands.register("reset", handlerReset)
+	commands.register("users", handlerListUsers)
 
 	args := os.Args[1:]
-	if len(args) < 2 {
-		fmt.Printf("too few arguments, expected at least 2, got %d\n", len(args))
+	if len(args) < 1 {
+		fmt.Printf("too few arguments, expected at least 1, got %d\n", len(args))
 		os.Exit(1)
 	}
 

@@ -170,6 +170,25 @@ func handlerFollowFeed(s *state, cmd command, user database.User) error {
 	return nil
 }
 
+func handlerUnfollowFeed(s *state, cmd command, user database.User) error {
+	feed, err := s.db.GetFeedByURL(context.Background(), sql.NullString{String: cmd.args[0], Valid: true})
+	if err != nil {
+		fmt.Printf("error getting feed from url: %v", err)
+		os.Exit(1)
+	}
+
+	if err = s.db.DeleteFeedFollow(context.Background(), database.DeleteFeedFollowParams{
+		UserID:    uuid.NullUUID{UUID: user.ID, Valid: true},
+		FeedID:    uuid.NullUUID{UUID: feed.ID, Valid: true},
+	}); err != nil {
+		fmt.Printf("error unfollowing feed: %v", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("feed %s is no longer followed by %s\n", feed.Name.String, user.Name.String)
+	return nil
+}
+
 func handlerGetFollowingForUser(s *state, cmd command, user database.User) error {
 	feedFollows, err := s.db.GetFeedFollowsForUser(context.Background(), uuid.NullUUID{UUID: user.ID, Valid: true})
 	if err != nil {

@@ -34,7 +34,7 @@ func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	req.Header.Set("User-Agent", "gator")
 
 	client := &http.Client{}
-	res, err := client.Do(req) 
+	res, err := client.Do(req)
 	defer res.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("error sending request: %w", err)

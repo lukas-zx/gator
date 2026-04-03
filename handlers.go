@@ -95,18 +95,9 @@ func handlerAggregate(s *state, cmd command) error {
 	return nil
 }
 
-func handlerAddFeed(s *state, cmd command) error {
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 	if len(cmd.args) < 2 {
 		fmt.Printf("too few arguments, expected at least 2, got %d\n", len(cmd.args))
-		os.Exit(1)
-	}
-	userName := sql.NullString{
-		String: s.cfg.CurrentUserName,
-		Valid:  true,
-	}
-	user, err := s.db.GetUser(context.Background(), userName)
-	if err != nil {
-		fmt.Printf("error getting current user: %v", err)
 		os.Exit(1)
 	}
 
@@ -156,16 +147,10 @@ func handlerListFeeds(s *state, cmd command) error {
 	return nil
 }
 
-func handlerFollowFeed(s *state, cmd command) error {
+func handlerFollowFeed(s *state, cmd command, user database.User) error {
 	feed, err := s.db.GetFeedByURL(context.Background(), sql.NullString{String: cmd.args[0], Valid: true})
 	if err != nil {
 		fmt.Printf("error getting feed from url: %v", err)
-		os.Exit(1)
-	}
-
-	user, err := s.db.GetUser(context.Background(), sql.NullString{String: s.cfg.CurrentUserName, Valid: true})
-	if err != nil {
-		fmt.Printf("error getting user: %v", err)
 		os.Exit(1)
 	}
 
@@ -185,13 +170,7 @@ func handlerFollowFeed(s *state, cmd command) error {
 	return nil
 }
 
-func handlerGetFollowingForUser(s *state, cmd command) error {
-	user, err := s.db.GetUser(context.Background(), sql.NullString{String: s.cfg.CurrentUserName, Valid: true})
-	if err != nil {
-		fmt.Printf("error getting user: %v", err)
-		os.Exit(1)
-	}
-
+func handlerGetFollowingForUser(s *state, cmd command, user database.User) error {
 	feedFollows, err := s.db.GetFeedFollowsForUser(context.Background(), uuid.NullUUID{UUID: user.ID, Valid: true})
 	if err != nil {
 		fmt.Printf("error getting followed feeds: %v", err)

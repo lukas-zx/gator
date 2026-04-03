@@ -21,7 +21,7 @@ func handlerLogin(s *state, cmd command) error {
 		Valid:  true,
 	}
 	_, err := s.db.GetUser(context.Background(), userName)
-	if (err != nil) {
+	if err != nil {
 		fmt.Printf("user does not exist: %s\n", cmd.args[0])
 		os.Exit(1)
 	}
@@ -80,5 +80,49 @@ func handlerListUsers(s *state, cmd command) error {
 		fmt.Printf("* %s\n", userName)
 	}
 
+	return nil
+}
+
+func handlerAggregate(s *state, cmd command) error {
+	//feed, err := fetchFeed(context.Background(), cmd.args[0])
+	feed, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	if err != nil {
+		fmt.Printf("error fetching feed: %v", err)
+		os.Exit(1)
+	}
+
+	fmt.Println(feed)
+	return nil
+}
+
+func handlerAddFeed(s *state, cmd command) error {
+	if len(cmd.args) < 2 {
+		fmt.Printf("too few arguments, expected at least 2, got %d\n", len(cmd.args))
+		os.Exit(1)
+	}
+	userName := sql.NullString{
+		String: s.cfg.CurrentUserName,
+		Valid:  true,
+	}
+	user, err := s.db.GetUser(context.Background(), userName)
+	if err != nil {
+		fmt.Printf("error getting current user: %v", err)
+		os.Exit(1)
+	}
+
+	feed, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name:      sql.NullString{String: cmd.args[0], Valid: true},
+		Url:       sql.NullString{String: cmd.args[1], Valid: true},
+		UserID:    uuid.NullUUID{UUID: user.ID, Valid: true},
+	})
+	if err != nil {
+		fmt.Printf("error creating feed: %v", err)
+		os.Exit(1)
+	}
+
+	fmt.Println(feed)
 	return nil
 }
